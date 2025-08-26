@@ -1,1 +1,11 @@
 
+services:
+  - type: web
+    name: quantum-sentinel
+    env: static
+    buildCommand: echo "Static build complete"
+    staticPublishPath: ./src
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
