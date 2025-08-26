@@ -5,9 +5,11 @@
   "description": "Advanced Holographic APK Scanner with Quantum Visual Effects",
   "main": "src/index.html",
   
+{
   "scripts": {
     "start": "node src/app.js"
   }
+}
 
     "build": "echo 'Static build complete'",
     "dev": "serve src"
