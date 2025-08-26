@@ -1,16 +1,10 @@
-
 {
   "name": "quantum-sentinel",
   "version": "1.0.0",
   "description": "Advanced Holographic APK Scanner with Quantum Visual Effects",
   "main": "src/index.html",
-  
-{
   "scripts": {
-    "start": "node src/app.js"
-  }
-}
-
+    "start": "serve -s src -l 3000",
     "build": "echo 'Static build complete'",
     "dev": "serve src"
   },
