@@ -1,5 +1,5 @@
 
-// Quantum Sentinel - Complete Application Logic
+// Quantum Sentinel - Complete Application logic
 
 // Particle System
 function createParticles() {
