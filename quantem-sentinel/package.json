@@ -1,1 +1,21 @@
 
+{
+  "name": "quantum-sentinel",
+  "version": "1.0.0",
+  "description": "Advanced Holographic APK Scanner with Quantum Visual Effects",
+  "main": "src/index.html",
+  "scripts": {
+    "start": "serve -s src -l 3000",
+    "build": "echo 'Static build complete'",
+    "dev": "serve src"
+  },
+  "keywords": ["apk-scanner", "cybersecurity", "holographic-ui", "quantum-design"],
+  "author": "Quantum Sentinel Team",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.2.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
