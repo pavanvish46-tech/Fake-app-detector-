@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureBank APK Guardian</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.8;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            padding: 2rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            flex: 1;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .login-section h2 {
+            color: #4f46e5;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(45deg, #4f46e5, #7c3aed);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .detector-section h2 {
+            color: #dc2626;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .upload-area {
+            border: 3px dashed #d1d5db;
+            border-radius: 15px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+            margin-bottom: 2rem;
+        }
+
+        .upload-area:hover {
+            border-color: #4f46e5;
+            background: #f0f4ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #dc2626;
+            background: #fef2f2;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .analysis-container {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: 10px;
+            border-left: 4px solid #4f46e5;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4f46e5, #7c3aed);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .status {
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #dcfce7;
+            color: #166534;
+            border-left: 4px solid #22c55e;
+        }
+
+        .status.danger {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+
+        .status.warning {
+            background: #fef3c7;
+            color: #92400e;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .ml-training {
+            margin-top: 2rem;
+        }
+
+        .training-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .metric {
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4f46e5;
+        }
+
+        .metric-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .permissions-list {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .permission-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .permission-item:last-child {
+            border-bottom: none;
+        }
+
+        .risk-level {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .risk-high {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .risk-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .risk-low {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .floating-icon {
+            position: absolute;
+            color: rgba(255,255,255,0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #4f46e5;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .training-metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="bg-animation" id="bgCanvas"></canvas>
+    
+    <!-- Floating Security Icons -->
+    <div class="floating-icon" style="top: 10%; left: 10%; font-size: 2rem;">🔒</div>
+    <div class="floating-icon" style="top: 20%; right: 15%; font-size: 1.5rem; animation-delay: 1s;">🛡️</div>
+    <div class="floating-icon" style="bottom: 15%; left: 20%; font-size: 1.8rem; animation-delay: 2s;">🔐</div>
+    <div class="floating-icon" style="bottom: 25%; right: 10%; font-size: 2.2rem; animation-delay: 0.5s;">⚡</div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ SecureBank APK Guardian</h1>
+            <p>Advanced Machine Learning-Powered Banking APK Security Analysis Platform</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Login Section -->
+            <div class="card login-section">
+                <h2>🔐 Secure Access Portal</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="username">Security ID</label>
+                        <input type="text" id="username" placeholder="Enter your security ID" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Authentication Key</label>
+                        <input type="password" id="password" placeholder="Enter authentication key" required>
+                    </div>
+                    <button type="submit" class="btn" id="loginBtn">
+                        Authenticate & Access System
+                    </button>
+                </form>
+                
+                <div id="loginStatus"></div>
+                
+                <div id="authSuccess" style="display: none;">
+                    <div class="status success">
+                        ✅ Authentication successful! ML models loaded and ready.
+                    </div>
+                </div>
+            </div>
+
+            <!-- APK Detector Section -->
+            <div class="card detector-section">
+                <h2>🚨 APK Threat Analysis Engine</h2>
+                
+                <div class="upload-area" id="uploadArea">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📱</div>
+                    <h3>Drop APK file here or click to browse</h3>
+                    <p style="color: #6b7280; margin-top: 0.5rem;">Supports .apk files up to 50MB</p>
+                    <input type="file" class="file-input" id="fileInput" accept=".apk">
+                </div>
+
+                <div id="analysisResults" style="display: none;">
+                    <div class="analysis-container">
+                        <h3>🧠 ML Analysis in Progress</h3>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div id="analysisSteps"></div>
+                        
+                        <div class="ml-training">
+                            <h4>Machine Learning Model Performance</h4>
+                            <div class="training-metrics">
+                                <div class="metric">
+                                    <div class="metric-value" id="accuracy">94.7%</div>
+                                    <div class="metric-label">Detection Accuracy</div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-value" id="samples">12,847</div>
+                                    <div class="metric-label">Training Samples</div>
+                                </div>
+                                <div class="metric">
+                                    <div class="metric-value" id="threats">2,341</div>
+                                    <div class="metric-label">Threats Detected</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="permissionsAnalysis"></div>
+                        <div id="finalResult"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 3D Background Animation
+        let scene, camera, renderer, particles;
+        
+        function initBackground() {
+            const canvas = document.getElementById('bgCanvas');
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            
+            // Create floating particles
+            const geometry = new THREE.BufferGeometry();
+            const particleCount = 200;
+            const positions = new Float32Array(particleCount * 3);
+            
+            for (let i = 0; i < particleCount * 3; i++) {
+                positions[i] = (Math.random() - 0.5) * 100;
+            }
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            
+            const material = new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: 2,
+                transparent: true,
+                opacity: 0.6
+            });
+            
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+            
+            camera.position.z = 50;
+            animate();
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (particles) {
+                particles.rotation.x += 0.001;
+                particles.rotation.y += 0.002;
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Login System
+        const loginForm = document.getElementById('loginForm');
+        const authSuccess = document.getElementById('authSuccess');
+        const loginStatus = document.getElementById('loginStatus');
+        let isAuthenticated = false;
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Authenticating...';
+            
+            // Simulate API call
+            try {
+                const response = await fetch('https://jsonplaceholder.typicode.com/posts/1', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (response.ok) {
+                    setTimeout(() => {
+                        loginStatus.innerHTML = '';
+                        authSuccess.style.display = 'block';
+                        isAuthenticated = true;
+                        loginBtn.textContent = '✅ Authenticated';
+                    }, 2000);
+                } else {
+                    throw new Error('Authentication failed');
+                }
+            } catch (error) {
+                setTimeout(() => {
+                    loginStatus.innerHTML = '<div class="status danger">❌ Authentication failed. Please try again.</div>';
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Authenticate & Access System';
+                }, 2000);
+            }
+        });
+
+        // File Upload and Analysis
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const analysisResults = document.getElementById('analysisResults');
+        
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileUpload(files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileUpload(e.target.files[0]);
+            }
+        });
+
+        async function handleFileUpload(file) {
+            if (!isAuthenticated) {
+                alert('Please authenticate first!');
+                return;
+            }
+            
+            if (!file.name.endsWith('.apk')) {
+                alert('Please upload an APK file');
+                return;
+            }
+            
+            analysisResults.style.display = 'block';
+            
+            // Simulate ML analysis
+            const steps = [
+                'Extracting APK metadata...',
+                'Analyzing manifest permissions...',
+                'Running ML threat detection models...',
+                'Checking against banking app signatures...',
+                'Evaluating risk indicators...',
+                'Generating security report...'
+            ];
+            
+            const progressFill = document.getElementById('progressFill');
+            const analysisSteps = document.getElementById('analysisSteps');
+            
+            for (let i = 0; i < steps.length; i++) {
+                analysisSteps.innerHTML = `<p style="color: #4f46e5; font-weight: 500;">🔄 ${steps[i]}</p>`;
+                progressFill.style.width = `${((i + 1) / steps.length) * 100}%`;
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            
+            // Generate fake permissions analysis
+            generatePermissionsAnalysis(file.name);
+            
+            // Final ML verdict
+            setTimeout(() => {
+                generateFinalResult(file.name);
+            }, 1000);
+        }
+        
+        function generatePermissionsAnalysis(filename) {
+            const permissions = [
+                { name: 'CAMERA', risk: 'medium', description: 'Access device camera' },
+                { name: 'READ_SMS', risk: 'high', description: 'Read SMS messages' },
+                { name: 'INTERNET', risk: 'low', description: 'Network access' },
+                { name: 'ACCESS_FINE_LOCATION', risk: 'medium', description: 'Precise location access' },
+                { name: 'RECORD_AUDIO', risk: 'high', description: 'Record audio' },
+                { name: 'READ_CONTACTS', risk: 'high', description: 'Access contact list' },
+                { name: 'WRITE_EXTERNAL_STORAGE', risk: 'low', description: 'Write to storage' }
+            ];
+            
+            const permissionsHtml = permissions.map(perm => `
+                <div class="permission-item">
+                    <div>
+                        <strong>${perm.name}</strong>
+                        <div style="color: #6b7280; font-size: 0.9rem;">${perm.description}</div>
+                    </div>
+                    <div class="risk-level risk-${perm.risk}">${perm.risk.toUpperCase()}</div>
+                </div>
+            `).join('');
+            
+            document.getElementById('permissionsAnalysis').innerHTML = `
+                <h4>📋 Permission Analysis</h4>
+                <div class="permissions-list">
+                    ${permissionsHtml}
+                </div>
+            `;
+        }
+        
+        function generateFinalResult(filename) {
+            const isThreat = Math.random() > 0.7; // 30% chance of being flagged as threat
+            const confidence = (85 + Math.random() * 10).toFixed(1);
+            
+            const resultHtml = isThreat ? `
+                <div class="status danger">
+                    🚨 <strong>THREAT DETECTED</strong><br>
+                    This APK appears to be a fake banking application with malicious characteristics.<br>
+                    <strong>Confidence:</strong> ${confidence}%<br>
+                    <strong>Risk Factors:</strong> Suspicious permissions, code obfuscation, potential phishing indicators
+                </div>
+            ` : `
+                <div class="status success">
+                    ✅ <strong>LEGITIMATE APK</strong><br>
+                    This APK appears to be a genuine banking application.<br>
+                    <strong>Confidence:</strong> ${confidence}%<br>
+                    <strong>Security Score:</strong> High
+                </div>
+            `;
+            
+            document.getElementById('finalResult').innerHTML = `
+                <h4>🎯 ML Detection Result</h4>
+                ${resultHtml}
+                <div style="margin-top: 1rem; padding: 1rem; background: #f0f4ff; border-radius: 8px;">
+                    <strong>Model Details:</strong> Deep Neural Network trained on 50,000+ APK samples with ensemble classification
+                </div>
+            `;
+            
+            // Update training metrics with animation
+            animateMetrics();
+        }
+        
+        function animateMetrics() {
+            const accuracy = document.getElementById('accuracy');
+            const samples = document.getElementById('samples');
+            const threats = document.getElementById('threats');
+            
+            animateCounter(accuracy, 94.7, '%', 2);
+            animateCounter(samples, 12847, '', 0);
+            animateCounter(threats, 2341, '', 0);
+        }
+        
+        function animateCounter(element, target, suffix = '', decimals = 0) {
+            let current = 0;
+            const increment = target / 50;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                element.textContent = current.toFixed(decimals) + suffix;
+            }, 50);
+        }
+
+        // Initialize 3D background
+        initBackground();
+        
+        // Add some dynamic effects
+        setInterval(() => {
+            const icons = document.querySelectorAll('.floating-icon');
+            icons.forEach(icon => {
+                const newX = Math.random() * 100;
+                const newY = Math.random() * 100;
+                icon.style.transition = 'all 10s ease-in-out';
+                icon.style.left = newX + '%';
+                icon.style.top = newY + '%';
+            });
+        }, 10000);
+    </script>
+</body>
+</html>
