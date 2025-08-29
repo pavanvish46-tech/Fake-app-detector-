@@ -1,0 +1,21 @@
+{
+  "name": "fake-apk-detector-",
+  "version": "1.0.0",
+  "description": "ML-powered Banking APK Security Detection System for Hackathon",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["cybersecurity", "apk", "machine-learning", "banking", "security"],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
